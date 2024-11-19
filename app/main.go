@@ -30,3 +30,25 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 
 	fmt.Fprintf(response, "Received message: %+v", requestModel)
 }
+
+/*
+Этот метод удалить, просто интересуюсь как работают тесты
+*/
+func HelloName(name string, language string) (string, error) {
+	if name == "" {
+		name = "World"
+	}
+
+	prefix := ""
+
+	switch language {
+	case "english":
+		prefix = "Hello"
+	case "russian":
+		prefix = "Привет"
+	default:
+		return "", fmt.Errorf("%s", "Не передан язык")
+	}
+
+	return prefix + ", " + name, nil
+}
