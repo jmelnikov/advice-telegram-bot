@@ -1,9 +1,9 @@
 package models
 
 type Message struct {
-	Message_id int
+	MessageId  int		`json:"message_id"`
 	From       From
 	Chat       Chat
-	Date       int
-	Text       string
+	Date       int		`json:"date"`
+	Text       string	`json:"text"`
 }

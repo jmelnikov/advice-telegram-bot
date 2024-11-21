@@ -1,6 +1,6 @@
 package models
 
 type Request struct {
-	Update_id int
+	UpdateId  int		`json:"update_id"`
 	Message   Message
 }
