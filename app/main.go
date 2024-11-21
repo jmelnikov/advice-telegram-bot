@@ -2,18 +2,27 @@ package main
 
 import (
 	"app/models"
+	"app/service"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	// "app/service"
 )
 
 func main() {
 	http.HandleFunc("/", ServeBot)
+	http.HandleFunc("/test", ServeTest)
 	http.ListenAndServe(":8080", nil)
 }
 
+func ServeTest(response http.ResponseWriter, request *http.Request) {
+	message := "Hello, Yuriy"
+
+	fmt.Fprint(response, message)
+}
+
 func ServeBot(response http.ResponseWriter, request *http.Request) {
+	service.SendMessage()
+
 	if request.Method != "POST" {
 		http.Error(response, "404", http.StatusBadRequest)
 		return
