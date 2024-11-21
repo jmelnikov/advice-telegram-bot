@@ -1,13 +1,19 @@
 package service
 
 import (
+	"app/models"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 )
 
-func SendMessage() error {
-	request, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:8080/test", nil)
+func SendMessage(requestModel models.Request) error {
+	request, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("http://127.0.0.1:8080/test?name=%s",
+			url.QueryEscape(requestModel.Message.From.GetFullName())),
+		nil)
 	if err != nil {
 		fmt.Println("Ошибка при создании запроса")
 		_ = fmt.Errorf("%s", err)

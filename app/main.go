@@ -29,7 +29,7 @@ func ServeTest(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	message := "Hello, Yuriy"
+	message := "Hello, " + request.URL.Query().Get("name")
 
 	_, err := fmt.Fprint(response, message)
 	if err != nil {
@@ -42,19 +42,19 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 		http.Error(response, "404", http.StatusBadRequest)
 		return
 	}
-	err := service.SendMessage()
-	if err != nil {
-		return
-	}
 
 	var requestModel models.Request
 
 	decoder := json.NewDecoder(request.Body)
-	err = nil
-	err = decoder.Decode(&requestModel)
+	err := decoder.Decode(&requestModel)
 
 	if err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = service.SendMessage(requestModel)
+	if err != nil {
 		return
 	}
 
