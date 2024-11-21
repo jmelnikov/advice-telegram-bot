@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	// "app/service"
 )
 
 func main() {
@@ -28,7 +29,7 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(response, "Received message: %+v", requestModel)
+	fmt.Fprintf(response, "Received message: %+v, Fillname is %s", requestModel, requestModel.Message.From.GetFullName())
 }
 
 /*
