@@ -2,8 +2,8 @@
 
 services:
   app:
-    image: golang:1.23.3
-    working_dir: /go/src/app
+    build:
+      context: .
     volumes:
       - ./app:/go/src/app
     command: go run main.go
