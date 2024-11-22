@@ -28,25 +28,6 @@ func main() {
 	}
 }
 
-func ServeTest(response http.ResponseWriter, request *http.Request) {
-	if request.Method != http.MethodGet {
-		fprintf, err := fmt.Fprintf(response, "Method %s is not found!", request.Method)
-		if err != nil {
-			// Надо что-то сделать с этой переменной, в ней записано количество записанных байт
-			fmt.Println(fprintf)
-			return
-		}
-		return
-	}
-
-	message := "Hello, " + request.URL.Query().Get("name")
-
-	_, err := fmt.Fprint(response, message)
-	if err != nil {
-		return
-	}
-}
-
 func ServeBot(response http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodPost {
 		http.Error(response, "404", http.StatusBadRequest)
@@ -63,15 +44,46 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = service.SendMessage(requestModel)
+	err = service.ProcessMessage(requestModel)
+	// Ошибка обработки сообщения пользователя
 	if err != nil {
+		// Печатаем ошибку в консоль
+		fmt.Println(err)
+
+		// Отправляем сообщение об ошибке пользователю
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Header().Set("Content-Type", "application/json")
+		responsePayload := models.JsonResponse{Success: false,
+			Message: fmt.Sprintf("%s", err)}
+
+		err := json.NewEncoder(response).Encode(responsePayload)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
 		return
 	}
 
-	fprintf, err := fmt.Fprintf(response, "Received message: %+v, Fillname is %s", requestModel, requestModel.Message.User.GetFullName())
+	response.WriteHeader(http.StatusNoContent)
+}
+
+// TODO: всё, что ниже -- под удаление!
+// Пока оставлю, чтобы смотреть на примеры.
+
+func ServeTest(response http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		_, err := fmt.Fprintf(response, "Method %s is not found!", request.Method)
+		if err != nil {
+			return
+		}
+		return
+	}
+
+	message := "Hello, " + request.URL.Query().Get("name")
+
+	_, err := fmt.Fprint(response, message)
 	if err != nil {
-		// Надо что-то сделать с этой переменной, в ней записано количество записанных байт
-		fmt.Println(fprintf)
 		return
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"net/url"
 )
 
-func SendMessage(requestModel models.Request) error {
+func AdviceSendMessage(requestModel models.Request) error {
 	request, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("http://127.0.0.1:8080/test?name=%s",
