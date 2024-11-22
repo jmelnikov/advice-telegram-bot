@@ -3,14 +3,24 @@ package main
 import (
 	"app/models"
 	"app/service"
+	"database/sql"
 	"encoding/json"
-	"fmt"
+	"fmt" 
 	"net/http"
+	"strconv"
+	"io"
+	_ "github.com/mattn/go-sqlite3"
+	"app/repository"
 )
 
 func main() {
+	fmt.Println("Запустились, слушаем запросы...")
+
 	http.HandleFunc("/", ServeBot)
 	http.HandleFunc("/test", ServeTest)
+	http.HandleFunc("/echo", ServeEcho)
+	http.HandleFunc("/db", ServeDb)
+	http.HandleFunc("/user", ServeUser)
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
@@ -58,7 +68,7 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	fprintf, err := fmt.Fprintf(response, "Received message: %+v, Fillname is %s", requestModel, requestModel.Message.From.GetFullName())
+	fprintf, err := fmt.Fprintf(response, "Received message: %+v, Fillname is %s", requestModel, requestModel.Message.User.GetFullName())
 	if err != nil {
 		// Надо что-то сделать с этой переменной, в ней записано количество записанных байт
 		fmt.Println(fprintf)
@@ -84,4 +94,78 @@ func HelloName(name string, language string) (string, error) {
 	}
 
 	return prefix + ", " + name, nil
+}
+
+// ServeEcho выводит в консоль тело запроса
+func ServeEcho(response http.ResponseWriter, request *http.Request) {
+	body, err := io.ReadAll(request.Body)
+	fmt.Println(string(body))
+
+	message := "ok"
+
+	_, err = fmt.Fprint(response, message)
+	if err != nil {
+		return
+	}
+}
+
+func ServeDb(response http.ResponseWriter, request *http.Request) {
+	db, err := sql.Open("sqlite3", "storage.db")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM user")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+
+	users := []models.User{}
+	for rows.Next() {
+		u := models.User{}
+		err := rows.Scan(&u.Id, &u.IsBot, &u.FirstName, &u.LastName, &u.Username, &u.LanguageCode)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		users = append(users, u)
+	}
+
+	for _, user := range users {
+		fmt.Println(fmt.Sprintf("Id: %d,\nFirst name: %s,\nLastname: %s,\nUsername: %s",
+			user.Id, user.FirstName, user.LastName, user.Username))
+	}
+
+	response.WriteHeader(http.StatusNoContent)
+
+	// message := "ok"
+
+	// _, err = fmt.Fprint(response, message)
+	// if err != nil {
+	// 	return
+	// }
+}
+
+func ServeUser(response http.ResponseWriter, request *http.Request) {
+	userId, err := strconv.Atoi(request.URL.Query().Get("id"))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	message := fmt.Sprintf("Hello, %d", userId)
+
+	user, err := repository.GetUserById(userId)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(user)
+	}
+
+	_, err = fmt.Fprint(response, message)
 }
