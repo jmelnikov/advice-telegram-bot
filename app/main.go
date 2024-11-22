@@ -2,15 +2,15 @@ package main
 
 import (
 	"app/models"
+	"app/repository"
 	"app/service"
 	"database/sql"
 	"encoding/json"
-	"fmt" 
+	"fmt"
+	_ "github.com/mattn/go-sqlite3"
+	"io"
 	"net/http"
 	"strconv"
-	"io"
-	_ "github.com/mattn/go-sqlite3"
-	"app/repository"
 )
 
 func main() {
@@ -109,23 +109,33 @@ func ServeEcho(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func ServeDb(response http.ResponseWriter, request *http.Request) {
+func ServeDb(response http.ResponseWriter, _ *http.Request) {
 	db, err := sql.Open("sqlite3", "storage.db")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			return
+		}
+	}(db)
 
 	rows, err := db.Query("SELECT * FROM user")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
 
-	users := []models.User{}
+	var users []models.User
 	for rows.Next() {
 		u := models.User{}
 		err := rows.Scan(&u.Id, &u.IsBot, &u.FirstName, &u.LastName, &u.Username, &u.LanguageCode)
