@@ -170,13 +170,6 @@ func ServeDb(response http.ResponseWriter, _ *http.Request) {
 	}
 
 	response.WriteHeader(http.StatusNoContent)
-
-	// message := "ok"
-
-	// _, err = fmt.Fprint(response, message)
-	// if err != nil {
-	// 	return
-	// }
 }
 
 func ServeUser(response http.ResponseWriter, request *http.Request) {
