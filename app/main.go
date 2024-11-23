@@ -29,13 +29,14 @@ func main() {
 }
 
 func ServeBot(response http.ResponseWriter, request *http.Request) {
+	// Если метод запроса не POST, то возвращаем 405 Status Method Not Allowed
 	if request.Method != http.MethodPost {
-		http.Error(response, "404", http.StatusBadRequest)
+		response.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
+	// Декодируем сообщение пользователя
 	var requestModel models.Request
-
 	decoder := json.NewDecoder(request.Body)
 	err := decoder.Decode(&requestModel)
 
@@ -44,7 +45,9 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	// Запускаем основновной обработчик сообщения пользователя
 	err = service.ProcessMessage(requestModel)
+
 	// Ошибка обработки сообщения пользователя
 	if err != nil {
 		// Печатаем ошибку в консоль
@@ -52,15 +55,17 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 
 		// Отправляем сообщение об ошибке пользователю
 		response.WriteHeader(http.StatusInternalServerError)
-		response.Header().Set("Content-Type", "application/json")
-		responsePayload := models.JsonResponse{Success: false,
-			Message: fmt.Sprintf("%s", err)}
 
-		err := json.NewEncoder(response).Encode(responsePayload)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+// Всё, что ниже, нам пока не нужно
+//		response.Header().Set("Content-Type", "application/json")
+//		responsePayload := models.JsonResponse{Success: false,
+//			Message: fmt.Sprintf("%s", err)}
+//
+//		err := json.NewEncoder(response).Encode(responsePayload)
+//		if err != nil {
+//			fmt.Println(err)
+//			return
+//		}
 
 		return
 	}
