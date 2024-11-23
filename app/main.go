@@ -56,20 +56,10 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 		// Отправляем сообщение об ошибке пользователю
 		response.WriteHeader(http.StatusInternalServerError)
 
-// Всё, что ниже, нам пока не нужно
-//		response.Header().Set("Content-Type", "application/json")
-//		responsePayload := models.JsonResponse{Success: false,
-//			Message: fmt.Sprintf("%s", err)}
-//
-//		err := json.NewEncoder(response).Encode(responsePayload)
-//		if err != nil {
-//			fmt.Println(err)
-//			return
-//		}
-
 		return
 	}
 
+	// В случае успеха, возвращаем пустой ответ с кодом 204
 	response.WriteHeader(http.StatusNoContent)
 }
 
@@ -116,6 +106,7 @@ func HelloName(name string, language string) (string, error) {
 // ServeEcho выводит в консоль тело запроса
 func ServeEcho(response http.ResponseWriter, request *http.Request) {
 	body, err := io.ReadAll(request.Body)
+	fmt.Println("Echo request body:")
 	fmt.Println(string(body))
 
 	message := "ok"

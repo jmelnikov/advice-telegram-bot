@@ -3,19 +3,32 @@ package service
 import (
 	"app/models"
 	"database/sql"
+	"time"
 )
-import "fmt"
 
 func ProcessMessage(requestModel models.Request) error {
+	// Получаем пользователя
 	user, err := getUser(requestModel)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(fmt.Sprintf("%+v", user))
+	// Передаём пользователя и его сообщение в функцию отправки совета
+	err = AdviceSendMessage(user, requestModel)
+	if err != nil {
+		return err
+	}
+
+	// Обновляем дату последнего сообщения пользователя
+	user.LastMessage = sql.NullInt64{
+		Int64: time.Now().Unix(),
+		Valid: true,
+	}
+
+	// Обновляем данные пользователя в отдельном потоке
 	go updateUser(user)
 
-	return fmt.Errorf("method is not implemented")
+	return nil
 }
 
 func getUser(requestModel models.Request) (models.UserDb, error) {
@@ -25,15 +38,14 @@ func getUser(requestModel models.Request) (models.UserDb, error) {
 		return models.UserDb{}, err
 	}
 
+	// Ищем пользователя по его ID
 	row := db.QueryRow("SELECT * FROM user WHERE id=?", requestModel.Message.User.Id)
-	if err != nil {
-		return models.UserDb{}, err
-	}
 
 	// Записываем выбранного пользователя в структуру
 	user := models.UserDb{}
-	err = row.Scan(&user.Id, &user.IsBot, &user.FirstName, &user.LastName, &user.Username, &user.LanguageCode, &user.LastMessage, &user.GreatingSent)
+	err = row.Scan(&user.Id, &user.IsBot, &user.FirstName, &user.LastName, &user.Username, &user.LanguageCode, &user.LastMessage, &user.GreatingSent, &user.Gender)
 	if err != nil {
+		// Если при заполнении пользователя прозошла ошибка, то создаём нового пользователя
 		user, err = createUser(db, &requestModel)
 		if err != nil {
 			return models.UserDb{}, err
@@ -56,7 +68,7 @@ func getUser(requestModel models.Request) (models.UserDb, error) {
 
 func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error) {
 	// Подготавливаем запрпос
-	prepare, err := db.Prepare("INSERT INTO user (id, is_bot, first_name, last_name, username, language_code, last_message, greating_sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	prepare, err := db.Prepare("INSERT INTO user (id, is_bot, first_name, last_name, username, language_code, last_message, greating_sent, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return models.UserDb{}, err
 	}
@@ -71,6 +83,7 @@ func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error)
 		LanguageCode: requestModel.Message.User.LanguageCode,
 		LastMessage: sql.NullInt64{},
 		GreatingSent: sql.NullBool{Bool: false},
+		Gender: sql.NullString{},
 	}
 
 	// Подставляем значения и выполняем запрос
@@ -81,7 +94,8 @@ func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error)
 		user.Username,
 		user.LanguageCode,
 		user.LastMessage,
-		user.GreatingSent)
+		user.GreatingSent,
+		user.Gender)
 	if err != nil {
 		return models.UserDb{}, err
 	}
@@ -110,10 +124,12 @@ func updateUser(user models.UserDb) {
 }
 
 func emptyStringToNull(s string) sql.NullString {
+	// Если длина строки нулевая, то возвращаем NullString
 	if len(s) == 0 {
 		return sql.NullString{}
 	}
 
+	// Заполняем NullString значением
 	return sql.NullString{
 		String: s,
 		Valid: true,
