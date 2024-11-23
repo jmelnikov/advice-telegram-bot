@@ -1,7 +1,5 @@
 package models
 
-import "strings"
-
 type User struct {
 	Id            int		`json:"id"`
 	IsBot         bool		`json:"is_bot"`
@@ -11,9 +9,4 @@ type User struct {
 	LanguageCode  string	`json:"language_code"`
 	LastMessage   string    `json:"-"`
 	GreatingSent  bool		`json:"-"`
-}
-
-func (u User) GetFullName() string {
-	name := u.FirstName + " " + u.LastName
-	return strings.TrimSpace(name)
 }

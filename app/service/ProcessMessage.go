@@ -7,61 +7,86 @@ import (
 import "fmt"
 
 func ProcessMessage(requestModel models.Request) error {
+	user, err := getUser(requestModel)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(fmt.Sprintf("%+v", user))
+
+	return fmt.Errorf("method is not implemented")
+}
+
+func getUser(requestModel models.Request) (models.UserDb, error) {
 	// Подключаемся к БД
 	db, err := sql.Open("sqlite3", "storage.db")
 	if err != nil {
-		return err
+		return models.UserDb{}, err
 	}
 
-	row := db.QueryRow(fmt.Sprintf(
-		"SELECT * FROM user WHERE id=%d", requestModel.Message.User.Id))
+	row := db.QueryRow("SELECT * FROM user WHERE id=?", requestModel.Message.User.Id)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return models.UserDb{}, err
 	}
 
 	// Записываем выбранного пользователя в структуру
-	user := models.User{}
+	user := models.UserDb{}
 	err = row.Scan(&user.Id, &user.IsBot, &user.FirstName, &user.LastName, &user.Username, &user.LanguageCode, &user.LastMessage, &user.GreatingSent)
 	if err != nil {
-		err := createUser(db, &requestModel)
-		user = requestModel.Message.User
+		user, err = createUser(db, &requestModel)
 		if err != nil {
-			return err
+			return models.UserDb{}, err
 		}
 	}
 
 	// Закрываем указатель на соединение с БД
 	err = db.Close()
 	if err != nil {
-		return err
+		return models.UserDb{}, err
 	}
 
-	fmt.Println(user)
-
-	return fmt.Errorf("method is not implemented")
+	return user, err
 }
 
-func createUser(db *sql.DB, requestModel *models.Request) error {
+func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error) {
 	prepare, err := db.Prepare("INSERT INTO user (id, is_bot, first_name, last_name, username, language_code, last_message, greating_sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		return err
+		return models.UserDb{}, err
 	}
 
-	requestModel.Message.User.LastMessage = "00:00"
-	requestModel.Message.User.GreatingSent = false
+	user := models.UserDb{
+		Id: requestModel.Message.User.Id,
+		IsBot: requestModel.Message.User.IsBot,
+		FirstName: requestModel.Message.User.FirstName,
+		LastName: emptyStringToNull(requestModel.Message.User.LastName),
+		Username: emptyStringToNull(requestModel.Message.User.Username),
+		LanguageCode: requestModel.Message.User.LanguageCode,
+		LastMessage: sql.NullInt64{},
+		GreatingSent: sql.NullBool{Bool: false},
+	}
 
-	_, err = prepare.Exec(requestModel.Message.User.Id,
-		requestModel.Message.User.IsBot,
-		requestModel.Message.User.FirstName,
-		requestModel.Message.User.LastName,
-		requestModel.Message.User.Username,
-		requestModel.Message.User.LanguageCode,
-		requestModel.Message.User.LastMessage,
-		requestModel.Message.User.GreatingSent)
+	_, err = prepare.Exec(user.Id,
+		user.IsBot,
+		user.FirstName,
+		user.LastName,
+		user.Username,
+		user.LanguageCode,
+		user.LastMessage,
+		user.GreatingSent)
 	if err != nil {
-		return err
+		return models.UserDb{}, err
 	}
 
-	return nil
+	return user, err
+}
+
+func emptyStringToNull(s string) sql.NullString {
+	if len(s) == 0 {
+		return sql.NullString{}
+	}
+
+	return sql.NullString{
+		String: s,
+		Valid: true,
+	}
 }
