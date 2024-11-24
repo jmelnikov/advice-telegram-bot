@@ -40,8 +40,9 @@ func ServeBot(response http.ResponseWriter, request *http.Request) {
 	decoder := json.NewDecoder(request.Body)
 	err := decoder.Decode(&requestModel)
 
-	if err != nil {
-		http.Error(response, err.Error(), http.StatusBadRequest)
+	// Проверяем не только на ошибки, но и на пустую структуру запроса
+	if err != nil || requestModel == (models.Request{}) {
+		response.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
