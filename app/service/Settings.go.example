@@ -7,3 +7,7 @@ const botApiKey = ""
 func GetSendMessageUrl() string {
 	return fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", botApiKey)
 }
+
+func GetSendChatActionUrl() string {
+	return fmt.Sprintf("https://api.telegram.org/bot%s/sendChatAction", botApiKey)
+}
