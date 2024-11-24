@@ -14,7 +14,7 @@ import (
 func AdviceSendMessage(user models.UserDb, requestModel models.Request) error {
 	// Если в сообщении пользователя не встречаются слова "совет" и "advice", то прерываем выполнение метода
 	if strings.Contains(requestModel.Message.Text, "advice") == false &&
-	   strings.Contains(requestModel.Message.Text, "совет") == false {
+		strings.Contains(requestModel.Message.Text, "совет") == false {
 		return nil
 	}
 
@@ -56,11 +56,11 @@ func getRandomAdvice(user models.UserDb) (models.AdviceDb, error) {
 	return advice, nil
 }
 
-func sendAdvice(user models.UserDb, requestModel models.Request, advice models.AdviceDb)  {
+func sendAdvice(user models.UserDb, requestModel models.Request, advice models.AdviceDb) {
 	// Подготавливаем структуру сообщения для пользователя
 	message := models.SendMessage{
 		ChatId: requestModel.Message.Chat.Id,
-		Text: advice.GetAdviceTextForUser(user),
+		Text:   advice.GetAdviceTextForUser(user),
 		ReplyParameters: models.ReplyParameters{
 			MessageId: requestModel.Message.MessageId,
 		},
@@ -69,12 +69,12 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 
 	// Получаем количество секунд, нужное на набор сообщения
 	// Рассчитываем, что средняя скорость печати -- 8 символов в секунду
-	needSecondsForWriteMessage := utf8.RuneCountInString(message.Text)/8
+	needSecondsForWriteMessage := utf8.RuneCountInString(message.Text) / 8
 
 	// При отравке уведомления "Печатает...", он держится на стороне клиента 5 секунд.
 	// Чтобы светилось сообщение "Печатает..." весь срок формирования сообщения,
 	// Отправляем это уведомление каждые 5 секунд
-	actionCount := needSecondsForWriteMessage/5
+	actionCount := needSecondsForWriteMessage / 5
 
 	// Создаём уведомление о том, что бот печатает
 	chatAction := models.SendChatAction{
@@ -83,7 +83,7 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 	}
 
 	// В цикле отправляем сообщение столько раз, сколько высчитали выше
-	for i:=0; i<=actionCount; i++ {
+	for i := 0; i <= actionCount; i++ {
 		encodedChatAction, err := json.Marshal(chatAction)
 		if err != nil {
 			continue

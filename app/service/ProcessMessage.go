@@ -75,15 +75,15 @@ func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error)
 
 	// Создаём структуру пользователя для БД
 	user := models.UserDb{
-		Id: requestModel.Message.User.Id,
-		IsBot: requestModel.Message.User.IsBot,
-		FirstName: requestModel.Message.User.FirstName,
-		LastName: emptyStringToNull(requestModel.Message.User.LastName),
-		Username: emptyStringToNull(requestModel.Message.User.Username),
+		Id:           requestModel.Message.User.Id,
+		IsBot:        requestModel.Message.User.IsBot,
+		FirstName:    requestModel.Message.User.FirstName,
+		LastName:     emptyStringToNull(requestModel.Message.User.LastName),
+		Username:     emptyStringToNull(requestModel.Message.User.Username),
 		LanguageCode: requestModel.Message.User.LanguageCode,
-		LastMessage: sql.NullInt64{},
+		LastMessage:  sql.NullInt64{},
 		GreatingSent: sql.NullBool{Bool: false},
-		Gender: sql.NullString{},
+		Gender:       sql.NullString{},
 	}
 
 	// Подставляем значения и выполняем запрос
@@ -132,6 +132,6 @@ func emptyStringToNull(s string) sql.NullString {
 	// Заполняем NullString значением
 	return sql.NullString{
 		String: s,
-		Valid: true,
+		Valid:  true,
 	}
 }
