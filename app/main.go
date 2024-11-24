@@ -2,15 +2,11 @@ package main
 
 import (
 	"app/models"
-	"app/repository"
 	"app/service"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"io"
 	"net/http"
-	"strconv"
 )
 
 func main() {
