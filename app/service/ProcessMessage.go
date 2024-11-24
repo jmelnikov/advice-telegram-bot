@@ -74,7 +74,7 @@ func getUser(requestModel models.Request) (models.UserDb, error) {
 
 func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error) {
 	// Подготавливаем запрпос
-	prepare, err := db.Prepare("INSERT INTO user (id, is_bot, first_name, last_name, username, language_code, last_message, greating_sent, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	prepare, err := db.Prepare("INSERT INTO user (id, is_bot, first_name, last_name, username, language_code, last_message, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return models.UserDb{}, err
 	}
@@ -115,7 +115,7 @@ func updateUser(user models.UserDb) {
 	}
 
 	// Подготавливаем запрпос
-	prepare, err := db.Prepare("UPDATE user SET first_name=?, last_name=?, username=?, last_message=?, greating_sent=? WHERE id=?")
+	prepare, err := db.Prepare("UPDATE user SET first_name=?, last_name=?, username=?, last_message=? WHERE id=?")
 	if err != nil {
 		return
 	}
