@@ -6,10 +6,6 @@ import (
 	"encoding/json"
 	"time"
 	"unicode/utf8"
-
-	//	"io"
-	//	"net/http"
-	//	"net/url"
 )
 
 func GreatingsSendMessage(user models.UserDb, requestModel models.Request) error {
