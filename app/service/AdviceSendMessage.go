@@ -76,6 +76,11 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 	// Отправляем это уведомление каждые 5 секунд
 	actionCount := needSecondsForWriteMessage / 5
 
+	// Не отправлять сообщение моментально
+	if actionCount < 1 {
+		actionCount = 1
+	}
+
 	// Создаём уведомление о том, что бот печатает
 	chatAction := models.SendChatAction{
 		ChatId: requestModel.Message.Chat.Id,

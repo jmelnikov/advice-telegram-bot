@@ -13,6 +13,12 @@ func ProcessMessage(requestModel models.Request) error {
 		return err
 	}
 
+	// Передаём пользователя и его сообщение в функцию отправки приветствия
+	err = GreatingsSendMessage(user, requestModel)
+	if err != nil {
+		return err
+	}
+
 	// Передаём пользователя и его сообщение в функцию отправки совета
 	err = AdviceSendMessage(user, requestModel)
 	if err != nil {
