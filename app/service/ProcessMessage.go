@@ -74,7 +74,7 @@ func getUser(requestModel models.Request) (models.UserDb, error) {
 
 func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error) {
 	// Подготавливаем запрпос
-	prepare, err := db.Prepare("INSERT INTO user (id, is_bot, first_name, last_name, username, language_code, last_message, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	prepare, err := db.Prepare("INSERT INTO user (id, is_bot, first_name, last_name, username, language_code, last_message, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return models.UserDb{}, err
 	}
