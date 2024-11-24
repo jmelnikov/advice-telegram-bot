@@ -83,7 +83,7 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 	}
 
 	// В цикле отправляем сообщение столько раз, сколько высчитали выше
-	for i := 0; i <= actionCount; i++ {
+	for i := 0; i < actionCount; i++ {
 		encodedChatAction, err := json.Marshal(chatAction)
 		if err != nil {
 			continue
