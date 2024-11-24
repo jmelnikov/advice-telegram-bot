@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
+	"unicode/utf8"
 )
 
 func AdviceSendMessage(user models.UserDb, requestModel models.Request) error {
@@ -22,8 +24,8 @@ func AdviceSendMessage(user models.UserDb, requestModel models.Request) error {
 		return err
 	}
 
-	// Отправляем совет пользователю
-	sendAdvice(user, requestModel, advice)
+	// Отправляем совет пользователю в новом потоке
+	go sendAdvice(user, requestModel, advice)
 
 	return nil
 }
@@ -65,12 +67,47 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 		ParseMode: "html",
 	}
 
-	encodedJson, err := json.Marshal(message)
+	// Получаем количество секунд, нужное на набор сообщения
+	// Рассчитываем, что средняя скорость печати -- 8 символов в секунду
+	needSecondsForWriteMessage := utf8.RuneCountInString(message.Text)/8
 
-	// Подготавляиваем запрос для отправки
+	// Делим получившееся время на 5
+	actionCount := needSecondsForWriteMessage/5
+
+	// Создаём уведомление о том, что бот печатает
+	chatAction := models.SendChatAction{
+		ChatId: requestModel.Message.Chat.Id,
+		Action: "typing",
+	}
+
+	// В цикле отправляем сообщение столько раз, сколько высчитали выше
+	for i:=0; i<=actionCount; i++ {
+		encodedChatAction, err := json.Marshal(chatAction)
+		if err != nil {
+			continue
+		}
+
+		// Отправляем уведомление "Печатает..." пользователю
+		sendRequest(encodedChatAction, GetSendChatActionUrl())
+
+		// После каждой отправки засыпаем на 5 секунд
+		time.Sleep(5 * time.Second)
+	}
+
+	// Кодируем сообщение в JSON
+	encodedMessage, err := json.Marshal(message)
+	if err != nil {
+		return
+	}
+
+	// Отправляем пользователю
+	sendRequest(encodedMessage, GetSendMessageUrl())
+}
+
+func sendRequest(encodedJson []byte, endpoint string) {
 	request, err := http.NewRequest(
 		http.MethodPost,
-		GetSendMessageUrl(),
+		endpoint,
 		bytes.NewBuffer(encodedJson))
 	request.Header.Set("Content-Type", "application/json")
 
