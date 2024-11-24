@@ -71,7 +71,9 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 	// Рассчитываем, что средняя скорость печати -- 8 символов в секунду
 	needSecondsForWriteMessage := utf8.RuneCountInString(message.Text)/8
 
-	// Делим получившееся время на 5
+	// При отравке уведомления "Печатает...", он держится на стороне клиента 5 секунд.
+	// Чтобы светилось сообщение "Печатает..." весь срок формирования сообщения,
+	// Отправляем это уведомление каждые 5 секунд
 	actionCount := needSecondsForWriteMessage/5
 
 	// Создаём уведомление о том, что бот печатает
