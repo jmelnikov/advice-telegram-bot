@@ -43,7 +43,7 @@ func getUser(requestModel models.Request) (models.UserDb, error) {
 
 	// Записываем выбранного пользователя в структуру
 	user := models.UserDb{}
-	err = row.Scan(&user.Id, &user.IsBot, &user.FirstName, &user.LastName, &user.Username, &user.LanguageCode, &user.LastMessage, &user.GreatingSent, &user.Gender)
+	err = row.Scan(&user.Id, &user.IsBot, &user.FirstName, &user.LastName, &user.Username, &user.LanguageCode, &user.LastMessage, &user.Gender)
 	if err != nil {
 		// Если при заполнении пользователя прозошла ошибка, то создаём нового пользователя
 		user, err = createUser(db, &requestModel)
@@ -82,7 +82,6 @@ func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error)
 		Username:     emptyStringToNull(requestModel.Message.User.Username),
 		LanguageCode: requestModel.Message.User.LanguageCode,
 		LastMessage:  sql.NullInt64{},
-		GreatingSent: sql.NullBool{Bool: false},
 		Gender:       sql.NullString{},
 	}
 
@@ -94,7 +93,6 @@ func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error)
 		user.Username,
 		user.LanguageCode,
 		user.LastMessage,
-		user.GreatingSent,
 		user.Gender)
 	if err != nil {
 		return models.UserDb{}, err
@@ -117,7 +115,7 @@ func updateUser(user models.UserDb) {
 	}
 
 	// Подставляем значения и выполняем запрос
-	_, err = prepare.Exec(user.FirstName, user.LastName, user.Username, user.LastMessage, user.GreatingSent, user.Id)
+	_, err = prepare.Exec(user.FirstName, user.LastName, user.Username, user.LastMessage, user.Id)
 	if err != nil {
 		return
 	}

@@ -7,6 +7,4 @@ type User struct {
 	LastName     string `json:"last_name"`
 	Username     string `json:"username"`
 	LanguageCode string `json:"language_code"`
-	LastMessage  string `json:"-"`
-	GreatingSent bool   `json:"-"`
 }

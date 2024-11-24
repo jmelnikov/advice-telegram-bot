@@ -13,7 +13,6 @@ type UserDb struct {
 	Username     sql.NullString `json:"username,omitempty"`
 	LanguageCode string         `json:"language_code"`
 	LastMessage  sql.NullInt64  `json:"-"`
-	GreatingSent sql.NullBool   `json:"-"`
 	Gender       sql.NullString `json:"-"`
 }
 
