@@ -1,2 +1,2 @@
-app/service/Settings.go
 app/storage.db
+app/config.json

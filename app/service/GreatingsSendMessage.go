@@ -4,6 +4,7 @@ import (
 	"app/models"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 	"unicode/utf8"
 )
@@ -19,6 +20,7 @@ func GreatingsSendMessage(user models.UserDb, requestModel models.Request) error
 	// Получаем случайное приветствие
 	greating, err := getRandomGreating(user)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -34,6 +36,7 @@ func getRandomGreating(user models.UserDb) (models.GreatingDb, error) {
 	// Подключаемся к БД
 	db, err := sql.Open("sqlite3", "storage.db")
 	if err != nil {
+		fmt.Println(err)
 		return models.GreatingDb{}, err
 	}
 
@@ -56,12 +59,14 @@ func getRandomGreating(user models.UserDb) (models.GreatingDb, error) {
 	var greating models.GreatingDb
 	err = row.Scan(&greating.Id, &greating.Text, &greating.Gender, &greating.TimeOfDay)
 	if err != nil {
+		fmt.Println(err)
 		return models.GreatingDb{}, err
 	}
 
 	// Закрываем соединение с БД
 	err = db.Close()
 	if err != nil {
+		fmt.Println(err)
 		return models.GreatingDb{}, err
 	}
 
@@ -100,6 +105,7 @@ func sendGreating(user models.UserDb, requestModel models.Request, greating mode
 	for i := 0; i < actionCount; i++ {
 		encodedChatAction, err := json.Marshal(chatAction)
 		if err != nil {
+			fmt.Println(err)
 			continue
 		}
 
@@ -113,6 +119,7 @@ func sendGreating(user models.UserDb, requestModel models.Request, greating mode
 	// Кодируем сообщение в JSON
 	encodedMessage, err := json.Marshal(message)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -21,6 +22,7 @@ func AdviceSendMessage(user models.UserDb, requestModel models.Request) error {
 	// Получаем случайный совет
 	advice, err := getRandomAdvice(user)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -34,6 +36,7 @@ func getRandomAdvice(user models.UserDb) (models.AdviceDb, error) {
 	// Подключаемся к БД
 	db, err := sql.Open("sqlite3", "storage.db")
 	if err != nil {
+		fmt.Println(err)
 		return models.AdviceDb{}, err
 	}
 
@@ -44,12 +47,14 @@ func getRandomAdvice(user models.UserDb) (models.AdviceDb, error) {
 	var advice models.AdviceDb
 	err = row.Scan(&advice.Id, &advice.Text, &advice.Gender)
 	if err != nil {
+		fmt.Println(err)
 		return models.AdviceDb{}, err
 	}
 
 	// Закрываем соединение с БД
 	err = db.Close()
 	if err != nil {
+		fmt.Println(err)
 		return models.AdviceDb{}, err
 	}
 
@@ -91,6 +96,7 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 	for i := 0; i < actionCount; i++ {
 		encodedChatAction, err := json.Marshal(chatAction)
 		if err != nil {
+			fmt.Println(err)
 			continue
 		}
 
@@ -104,6 +110,7 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 	// Кодируем сообщение в JSON
 	encodedMessage, err := json.Marshal(message)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -119,6 +126,7 @@ func sendRequest(encodedJson []byte, endpoint string) {
 	request.Header.Set("Content-Type", "application/json")
 
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 

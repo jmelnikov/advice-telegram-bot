@@ -3,6 +3,7 @@ package service
 import (
 	"app/models"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -10,18 +11,21 @@ func ProcessMessage(requestModel models.Request) error {
 	// Получаем пользователя
 	user, err := getUser(requestModel)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
 	// Передаём пользователя и его сообщение в функцию отправки приветствия
 	err = GreatingsSendMessage(user, requestModel)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
 	// Передаём пользователя и его сообщение в функцию отправки совета
 	err = AdviceSendMessage(user, requestModel)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -41,6 +45,7 @@ func getUser(requestModel models.Request) (models.UserDb, error) {
 	// Подключаемся к БД
 	db, err := sql.Open("sqlite3", "storage.db")
 	if err != nil {
+		fmt.Println(err)
 		return models.UserDb{}, err
 	}
 
@@ -51,9 +56,11 @@ func getUser(requestModel models.Request) (models.UserDb, error) {
 	user := models.UserDb{}
 	err = row.Scan(&user.Id, &user.IsBot, &user.FirstName, &user.LastName, &user.Username, &user.LanguageCode, &user.LastMessage, &user.Gender)
 	if err != nil {
+		fmt.Println(err)
 		// Если при заполнении пользователя прозошла ошибка, то создаём нового пользователя
 		user, err = createUser(db, &requestModel)
 		if err != nil {
+			fmt.Println(err)
 			return models.UserDb{}, err
 		}
 	}
@@ -66,6 +73,7 @@ func getUser(requestModel models.Request) (models.UserDb, error) {
 	// Закрываем указатель на соединение с БД
 	err = db.Close()
 	if err != nil {
+		fmt.Println(err)
 		return models.UserDb{}, err
 	}
 
@@ -76,6 +84,7 @@ func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error)
 	// Подготавливаем запрпос
 	prepare, err := db.Prepare("INSERT INTO user (id, is_bot, first_name, last_name, username, language_code, last_message, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
+		fmt.Println(err)
 		return models.UserDb{}, err
 	}
 
@@ -101,6 +110,7 @@ func createUser(db *sql.DB, requestModel *models.Request) (models.UserDb, error)
 		user.LastMessage,
 		user.Gender)
 	if err != nil {
+		fmt.Println(err)
 		return models.UserDb{}, err
 	}
 
@@ -111,18 +121,21 @@ func updateUser(user models.UserDb) {
 	// Подключаемся к БД
 	db, err := sql.Open("sqlite3", "storage.db")
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
 	// Подготавливаем запрпос
 	prepare, err := db.Prepare("UPDATE user SET first_name=?, last_name=?, username=?, last_message=? WHERE id=?")
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
 	// Подставляем значения и выполняем запрос
 	_, err = prepare.Exec(user.FirstName, user.LastName, user.Username, user.LastMessage, user.Id)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 }
