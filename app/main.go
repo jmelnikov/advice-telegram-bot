@@ -11,8 +11,22 @@ import (
 )
 
 func main() {
+	// Загружаем настройки исполнения
+	loadConfig()
+
 	fmt.Println("Запустились, слушаем запросы...")
 
+	// Устанавливаем функцию ServeBot по маршруту /
+	http.HandleFunc("/", ServeBot)
+
+	// Начинаем слушать запросы на указанном порту
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		return
+	}
+}
+
+func loadConfig() {
 	// Открвыаем файл config.json
 	file, err := os.Open("config.json")
 	if err != nil {
@@ -40,15 +54,6 @@ func main() {
 	err = file.Close()
 	if err != nil {
 		fmt.Printf("Не удалось закрыть файл: %v", err)
-		return
-	}
-
-	// Устанавливаем функцию ServeBot по маршруту /
-	http.HandleFunc("/", ServeBot)
-
-	// Начинаем слушать запросы на указанном порту
-	err = http.ListenAndServe(":8080", nil)
-	if err != nil {
 		return
 	}
 }
