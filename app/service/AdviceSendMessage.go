@@ -2,11 +2,9 @@ package service
 
 import (
 	"app/models"
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -101,7 +99,7 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 		}
 
 		// Отправляем уведомление "Печатает..." пользователю
-		sendRequest(encodedChatAction, GetSendChatActionUrl())
+		sendRequest(encodedChatAction, getSendChatActionUrl())
 
 		// После каждой отправки засыпаем на 5 секунд
 		time.Sleep(5 * time.Second)
@@ -115,22 +113,5 @@ func sendAdvice(user models.UserDb, requestModel models.Request, advice models.A
 	}
 
 	// Отправляем пользователю
-	sendRequest(encodedMessage, GetSendMessageUrl())
-}
-
-func sendRequest(encodedJson []byte, endpoint string) {
-	request, err := http.NewRequest(
-		http.MethodPost,
-		endpoint,
-		bytes.NewBuffer(encodedJson))
-	request.Header.Set("Content-Type", "application/json")
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// Отправляем подготовленный запрос
-	client := &http.Client{}
-	_, _ = client.Do(request)
+	sendRequest(encodedMessage, getSendMessageUrl())
 }

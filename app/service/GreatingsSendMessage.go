@@ -108,7 +108,7 @@ func sendGreating(user models.UserDb, requestModel models.Request, greating mode
 		}
 
 		// Отправляем уведомление "Печатает..." пользователю
-		sendRequest(encodedChatAction, GetSendChatActionUrl())
+		sendRequest(encodedChatAction, getSendChatActionUrl())
 
 		// После каждой отправки засыпаем на 5 секунд
 		time.Sleep(5 * time.Second)
@@ -122,5 +122,5 @@ func sendGreating(user models.UserDb, requestModel models.Request, greating mode
 	}
 
 	// Отправляем пользователю
-	sendRequest(encodedMessage, GetSendMessageUrl())
+	sendRequest(encodedMessage, getSendMessageUrl())
 }
