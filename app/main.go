@@ -19,9 +19,10 @@ func main() {
 	// Устанавливаем функцию ServeBot по маршруту /
 	http.HandleFunc("/", ServeBot)
 
-	// Начинаем слушать запросы на указанном порту
-	err := http.ListenAndServe(":8080", nil)
+	// Начинаем слушать запросы на порту, указанном в файле config.json
+	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 }
@@ -43,11 +44,13 @@ func loadConfig() {
 		return
 	}
 
-	// Устанавливаем переменную окружения BOT_API_KEY из файла
-	err = os.Setenv("BOT_API_KEY", config["BOT_API_KEY"])
-	if err != nil {
-		fmt.Printf("Не удалось установить переменную окружения: %v", err)
-		return
+	// Устанавливаем переменные окружения
+	for key, value := range config {
+		err := os.Setenv(key, value)
+		if err != nil {
+			fmt.Printf("Не удалось установить переменную окружения %s: %v", key, err)
+			continue
+		}
 	}
 
 	// Закрываем файл config.json
