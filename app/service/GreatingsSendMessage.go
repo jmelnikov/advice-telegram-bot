@@ -24,8 +24,6 @@ func GreatingsSendMessage(user models.UserDb, requestModel models.Request) error
 		return err
 	}
 
-	//	fmt.Println(greating)
-
 	// Отправляем совет пользователю в новом потоке
 	go sendGreating(user, requestModel, greating)
 
